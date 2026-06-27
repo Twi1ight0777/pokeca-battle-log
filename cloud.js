@@ -4,6 +4,8 @@
   const META_KEY = "pokemon-card-cloud-meta-v1";
   const CONFIG = window.POKECA_CLOUD_CONFIG || {};
   const CLOUD_TABLE = "pokeca_match_logs";
+  const INVITE_SALT = "pokeca-invite-v1:";
+  const INVITE_CODE_DIGEST = "54dda94f5dc09a6dc5b09fdaed0e13da32264bfbe73f3afe1edc010a01574764";
 
   let bridge = null;
   let client = null;
@@ -97,6 +99,7 @@
     ui.form = document.querySelector("#authForm");
     ui.emailInput = document.querySelector("#authEmailInput");
     ui.passwordInput = document.querySelector("#authPasswordInput");
+    ui.inviteCodeInput = document.querySelector("#inviteCodeInput");
     ui.signInButton = document.querySelector("#signInButton");
     ui.signUpButton = document.querySelector("#signUpButton");
     ui.passwordResetButton = document.querySelector("#passwordResetButton");
@@ -201,6 +204,18 @@
   async function signUp() {
     if (!client || !ui.form.reportValidity()) return;
 
+    const inviteCode = ui.inviteCodeInput?.value.trim() || "";
+    if (!inviteCode) {
+      setMessage("新規登録には招待コードが必要です。", "error");
+      ui.inviteCodeInput?.focus();
+      return;
+    }
+    if (!(await isValidInviteCode(inviteCode))) {
+      setMessage("招待コードが違います。仲間から共有されたコードを確認してください。", "error");
+      ui.inviteCodeInput?.focus();
+      return;
+    }
+
     setAuthBusy(true);
     setMessage("アカウントを作成しています…");
     try {
@@ -211,6 +226,7 @@
       } else {
         setMessage("確認メールを送りました。メール内のリンクを開いて登録を完了してください。", "success");
       }
+      ui.inviteCodeInput.value = "";
     } catch (error) {
       setMessage(readableError(error), "error");
     } finally {
@@ -266,6 +282,16 @@
       email: ui.emailInput.value.trim(),
       password: ui.passwordInput.value,
     };
+  }
+
+  async function isValidInviteCode(value) {
+    if (!window.crypto?.subtle) return false;
+    const normalized = value.trim().toUpperCase();
+    const text = `${INVITE_SALT}${normalized}`;
+    const bytes = new Uint8Array(Array.from(text, (character) => character.charCodeAt(0)));
+    const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+    const hex = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return hex === INVITE_CODE_DIGEST;
   }
 
   async function signOut() {
@@ -443,6 +469,7 @@
     [
       ui.signInButton,
       ui.signUpButton,
+      ui.inviteCodeInput,
       ui.passwordResetButton,
       ui.syncNowButton,
       ui.signOutButton,

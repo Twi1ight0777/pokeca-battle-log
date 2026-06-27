@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ポケカ戦績ノート</title>
-    <link rel="stylesheet" href="./styles.css?v=public-guide-01" />
+    <link rel="stylesheet" href="./styles.css?v=invite-code-01" />
   </head>
   <body>
     <div class="app-shell">
@@ -642,6 +642,10 @@
             <span>パスワード</span>
             <input id="authPasswordInput" type="password" minlength="8" autocomplete="current-password" required />
           </label>
+          <label class="field invite-code-field">
+            <span>招待コード <small>新規登録時のみ</small></span>
+            <input id="inviteCodeInput" type="text" autocomplete="one-time-code" spellcheck="false" />
+          </label>
           <div class="auth-actions">
             <button class="button primary" id="signInButton" type="submit">
               <span class="button-icon" data-icon="login"></span>
@@ -708,7 +712,7 @@
         </button>
       </div>
       <ol class="usage-list">
-        <li><strong>アカウント登録</strong><span>「ログイン」から新規登録し、確認メールを開きます。</span></li>
+        <li><strong>アカウント登録</strong><span>仲間から共有された招待コードを入力して新規登録し、確認メールを開きます。</span></li>
         <li><strong>対戦を記録</strong><span>大会・デッキ・勝敗などを入力して「登録」を押します。</span></li>
         <li><strong>成績を分析</strong><span>デッキ別、対面別、先後別の勝率や負け理由を確認します。</span></li>
         <li><strong>端末間で同期</strong><span>同じアカウントでログインすると、スマホとPCで戦績を共有できます。</span></li>
@@ -717,9 +721,9 @@
     </dialog>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./supabase-config.js?v=public-guide-01"></script>
-    <script src="./cloud.js?v=public-guide-01"></script>
-    <script src="./pokemon-data.js?v=public-guide-01"></script>
-    <script src="./app.js?v=public-guide-01"></script>
+    <script src="./supabase-config.js?v=invite-code-01"></script>
+    <script src="./cloud.js?v=invite-code-01"></script>
+    <script src="./pokemon-data.js?v=invite-code-01"></script>
+    <script src="./app.js?v=invite-code-01"></script>
   </body>
 </html>
