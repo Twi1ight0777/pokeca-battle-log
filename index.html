@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ポケカ戦績ノート</title>
+    <link rel="stylesheet" href="./styles.css?v=public-guide-01" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <p class="eyebrow">POKÉCA BATTLE LOG</p>
+          <h1>ポケカ戦績ノート</h1>
+          <div class="header-actions" aria-label="データ操作">
+            <span class="cloud-account-group">
+              <button class="button ghost" id="accountButton" type="button" title="アカウントと同期">
+                <span class="button-icon" data-icon="user"></span>
+                <span id="accountButtonLabel">ログイン</span>
+              </button>
+              <span class="cloud-status-badge" id="cloudStatusBadge" data-state="local" aria-live="polite">端末保存</span>
+            </span>
+            <button class="button ghost" id="helpButton" type="button" title="使い方">
+              <span class="button-icon" data-icon="help"></span>
+              <span>使い方</span>
+            </button>
+            <button class="button ghost" id="sampleButton" type="button" title="サンプルデータを追加">
+              <span class="button-icon" data-icon="spark"></span>
+              <span>サンプル</span>
+            </button>
+            <button class="button ghost" id="exportButton" type="button" title="CSVを書き出し">
+              <span class="button-icon" data-icon="download"></span>
+              <span>CSV</span>
+            </button>
+            <label class="button ghost file-button" title="CSVを読み込み">
+              <span class="button-icon" data-icon="upload"></span>
+              <span>読込</span>
+              <input id="importInput" type="file" accept=".csv,text/csv" />
+            </label>
+          </div>
+        </div>
+        <div class="header-visual" aria-hidden="true">
+          <img src="./assets/abstract-record-analysis-banner.png" alt="" />
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="metrics-grid" aria-label="主要成績">
+          <article class="metric-card">
+            <span class="metric-label">総試合</span>
+            <strong id="totalMatches">0</strong>
+            <span class="metric-note" id="matchScope">全期間</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">勝率</span>
+            <strong id="winRate">0%</strong>
+            <span class="metric-note" id="recordText">0勝 0敗 0分</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">連続</span>
+            <strong id="streakText">-</strong>
+            <span class="metric-note">直近の決着</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">最多使用</span>
+            <strong id="topDeck">-</strong>
+            <span class="metric-note" id="topDeckRate">0戦</span>
+          </article>
+        </section>
+
+        <div class="main-grid">
+          <section class="tool-panel record-panel" aria-labelledby="recordTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Record</p>
+                <h2 id="recordTitle">対戦を記録</h2>
+              </div>
+              <button class="icon-button danger" id="clearButton" type="button" title="すべて削除" aria-label="すべて削除">
+                <span data-icon="trash"></span>
+              </button>
+            </div>
+
+            <form id="matchForm" class="record-form">
+              <input id="matchId" type="hidden" />
+              <div class="field-row two">
+                <label class="field">
+                  <span>日付</span>
+                  <input id="dateInput" type="date" required />
+                </label>
+                <label class="field">
+                  <span>場所</span>
+                  <input id="placeInput" type="text" placeholder="カードショップ名" />
+                </label>
+              </div>
+
+              <div class="field-row two">
+                <label class="field">
+                  <span>大会</span>
+                  <input id="eventInput" type="text" placeholder="ジムバトル" />
+                </label>
+                <label class="field">
+                  <span>回戦</span>
+                  <select id="roundInput">
+                    <option value="">未記録</option>
+                    <option value="1">1回戦</option>
+                    <option value="2">2回戦</option>
+                    <option value="3">3回戦</option>
+                    <option value="4">4回戦</option>
+                    <option value="5">5回戦</option>
+                    <option value="6">6回戦</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="field-row three">
+                <label class="field">
+                  <span>自分のデッキ</span>
+                  <input id="playerDeckInput" type="text" list="playerDeckOptions" placeholder="リザードンex" required />
+                  <datalist id="playerDeckOptions"></datalist>
+                </label>
+                <label class="field">
+                  <span>デッキ版</span>
+                  <input id="deckVersionInput" type="text" list="deckVersionOptions" placeholder="シティ前 v2" />
+                  <datalist id="deckVersionOptions"></datalist>
+                </label>
+                <label class="field">
+                  <span>相手のデッキ</span>
+                  <input id="opponentDeckInput" type="text" list="opponentDeckOptions" placeholder="サーナイトex" required />
+                  <datalist id="opponentDeckOptions"></datalist>
+                </label>
+              </div>
+
+              <div class="field-row two">
+                <fieldset class="pokemon-picker">
+                  <legend>使用デッキのアイコン</legend>
+                  <label class="field pokemon-search-field">
+                    <span>ポケモンを検索</span>
+                    <input id="playerPokemonSearch" type="search" placeholder="日本語名・英語名・図鑑番号" autocomplete="off" />
+                  </label>
+                  <div class="pokemon-picker-grid">
+                    <label class="field">
+                      <span>1体目</span>
+                      <select id="playerIcon1Select" class="pokemon-select"></select>
+                    </label>
+                    <label class="field">
+                      <span>2体目</span>
+                      <select id="playerIcon2Select" class="pokemon-select"></select>
+                    </label>
+                  </div>
+                  <div class="pokemon-preview-row" id="playerIconPreview" aria-label="使用デッキのアイコンプレビュー"></div>
+                </fieldset>
+
+                <fieldset class="pokemon-picker">
+                  <legend>相手デッキのアイコン</legend>
+                  <label class="field pokemon-search-field">
+                    <span>ポケモンを検索</span>
+                    <input id="opponentPokemonSearch" type="search" placeholder="日本語名・英語名・図鑑番号" autocomplete="off" />
+                  </label>
+                  <div class="pokemon-picker-grid">
+                    <label class="field">
+                      <span>1体目</span>
+                      <select id="opponentIcon1Select" class="pokemon-select"></select>
+                    </label>
+                    <label class="field">
+                      <span>2体目</span>
+                      <select id="opponentIcon2Select" class="pokemon-select"></select>
+                    </label>
+                  </div>
+                  <div class="pokemon-preview-row" id="opponentIconPreview" aria-label="相手デッキのアイコンプレビュー"></div>
+                </fieldset>
+              </div>
+
+              <div class="field-row two compact">
+                <fieldset class="segmented-field">
+                  <legend>結果</legend>
+                  <label>
+                    <input type="radio" name="result" value="win" checked />
+                    <span>勝ち</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="result" value="loss" />
+                    <span>負け</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="result" value="draw" />
+                    <span>引分</span>
+                  </label>
+                </fieldset>
+
+                <fieldset class="segmented-field">
+                  <legend>先後</legend>
+                  <label>
+                    <input type="radio" name="turn" value="first" checked />
+                    <span>先攻</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="turn" value="second" />
+                    <span>後攻</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="turn" value="unknown" />
+                    <span>未記録</span>
+                  </label>
+                </fieldset>
+              </div>
+
+              <div class="field-row three">
+                <label class="field">
+                  <span>取得サイド</span>
+                  <select id="scoreForInput">
+                    <option value="">未記録</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>取られたサイド</span>
+                  <select id="scoreAgainstInput">
+                    <option value="">未記録</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>タグ</span>
+                  <input id="tagsInput" type="text" placeholder="シティ, 練習" />
+                </label>
+              </div>
+
+              <fieldset class="checkbox-panel">
+                <legend>負け理由</legend>
+                <div class="checkbox-grid">
+                  <label><input type="checkbox" name="lossReason" value="事故" /><span>事故</span></label>
+                  <label><input type="checkbox" name="lossReason" value="プレミ" /><span>プレミ</span></label>
+                  <label><input type="checkbox" name="lossReason" value="サイド落ち" /><span>サイド落ち</span></label>
+                  <label><input type="checkbox" name="lossReason" value="後攻不利" /><span>後攻不利</span></label>
+                  <label><input type="checkbox" name="lossReason" value="時間切れ" /><span>時間切れ</span></label>
+                  <label><input type="checkbox" name="lossReason" value="対面理解不足" /><span>対面理解不足</span></label>
+                  <label><input type="checkbox" name="lossReason" value="構築不利" /><span>構築不利</span></label>
+                  <label><input type="checkbox" name="lossReason" value="その他" /><span>その他</span></label>
+                </div>
+              </fieldset>
+
+              <div class="field-row two">
+                <label class="field">
+                  <span>対面評価</span>
+                  <select id="matchupRatingInput">
+                    <option value="">未記録</option>
+                    <option value="有利">有利</option>
+                    <option value="五分">五分</option>
+                    <option value="不利">不利</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>意識するカード</span>
+                  <input id="keyCardsInput" type="text" placeholder="ナンジャモ, ボスの指令" />
+                </label>
+              </div>
+
+              <div class="field-row two">
+                <label class="field">
+                  <span>先攻プラン</span>
+                  <textarea id="firstPlanInput" rows="2" placeholder="先2で押し切る、盤面優先など"></textarea>
+                </label>
+                <label class="field">
+                  <span>後攻プラン</span>
+                  <textarea id="secondPlanInput" rows="2" placeholder="後1の動き、返しの要求など"></textarea>
+                </label>
+              </div>
+
+              <label class="field">
+                <span>メモ</span>
+                <textarea id="notesInput" rows="3" placeholder="事故、分岐、入替候補など"></textarea>
+              </label>
+
+              <div class="form-actions">
+                <button class="button primary" id="submitButton" type="submit">
+                  <span class="button-icon" data-icon="plus"></span>
+                  <span>登録</span>
+                </button>
+                <button class="button secondary hidden" id="cancelEditButton" type="button">
+                  <span class="button-icon" data-icon="x"></span>
+                  <span>取消</span>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="analysis-stack" aria-label="戦績分析">
+            <section class="tool-panel filter-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="panel-kicker">Filter</p>
+                  <h2>絞り込み</h2>
+                </div>
+                <button class="icon-button" id="resetFiltersButton" type="button" title="絞り込みを解除" aria-label="絞り込みを解除">
+                  <span data-icon="rotate"></span>
+                </button>
+              </div>
+              <div class="filters-grid">
+                <label class="field search-field">
+                  <span>検索</span>
+                  <span class="search-wrap">
+                    <span data-icon="search"></span>
+                    <input id="queryInput" type="search" placeholder="デッキ、大会、場所、メモ" />
+                  </span>
+                </label>
+                <label class="field">
+                  <span>自分</span>
+                  <select id="playerDeckFilter"></select>
+                </label>
+                <label class="field">
+                  <span>相手</span>
+                  <select id="opponentDeckFilter"></select>
+                </label>
+                <label class="field">
+                  <span>結果</span>
+                  <select id="resultFilter">
+                    <option value="all">すべて</option>
+                    <option value="win">勝ち</option>
+                    <option value="loss">負け</option>
+                    <option value="draw">引分</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>先後</span>
+                  <select id="turnFilter">
+                    <option value="all">すべて</option>
+                    <option value="first">先攻</option>
+                    <option value="second">後攻</option>
+                    <option value="unknown">未記録</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <section class="tool-panel insight-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="panel-kicker">Insight</p>
+                  <h2>集計</h2>
+                </div>
+              </div>
+              <div class="split-bar" aria-label="勝敗比率">
+                <span id="winSlice" class="slice win"></span>
+                <span id="lossSlice" class="slice loss"></span>
+                <span id="drawSlice" class="slice draw"></span>
+              </div>
+              <div class="legend-row">
+                <span><i class="dot win"></i>勝ち <b id="winCount">0</b></span>
+                <span><i class="dot loss"></i>負け <b id="lossCount">0</b></span>
+                <span><i class="dot draw"></i>引分 <b id="drawCount">0</b></span>
+              </div>
+              <div class="trend-row" id="trendRow" aria-label="直近の結果"></div>
+            </section>
+          </section>
+        </div>
+
+        <section class="stats-grid" aria-label="詳細集計">
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Deck</p>
+                <h2>デッキ別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>デッキ</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="playerStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Matchup</p>
+                <h2>対面別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>相手</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="opponentStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Turn</p>
+                <h2>先後別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>先後</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="turnStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="deep-stats-grid" aria-label="改善分析">
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Version</p>
+                <h2>デッキ版別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>デッキ版</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="deckVersionStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Loss</p>
+                <h2>負け理由</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>理由</th>
+                    <th>件数</th>
+                    <th>割合</th>
+                  </tr>
+                </thead>
+                <tbody id="lossReasonStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel wide-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Matchup x Turn</p>
+                <h2>対面 × 先後</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>相手</th>
+                    <th>先攻</th>
+                    <th>後攻</th>
+                    <th>差</th>
+                  </tr>
+                </thead>
+                <tbody id="matchupTurnStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Prize</p>
+                <h2>サイド差</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>サイド</th>
+                    <th>件数</th>
+                    <th>傾向</th>
+                  </tr>
+                </thead>
+                <tbody id="sideDiffStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Event</p>
+                <h2>大会別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>大会</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="eventStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Place</p>
+                <h2>場所別</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>場所</th>
+                    <th>戦績</th>
+                    <th>勝率</th>
+                  </tr>
+                </thead>
+                <tbody id="placeStatsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="tool-panel table-panel wide-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-kicker">Plan</p>
+                <h2>対面ノート</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>相手</th>
+                    <th>評価</th>
+                    <th>意識カード</th>
+                    <th>先攻/後攻プラン</th>
+                  </tr>
+                </thead>
+                <tbody id="matchupNotesBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="tool-panel match-list-panel" aria-labelledby="listTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="panel-kicker">History</p>
+              <h2 id="listTitle">戦績一覧</h2>
+            </div>
+            <span class="count-pill" id="visibleCount">0件</span>
+          </div>
+          <div class="table-wrap">
+            <table class="match-table">
+              <thead>
+                <tr>
+                  <th>日付</th>
+                  <th>自分</th>
+                  <th>相手</th>
+                  <th>結果</th>
+                  <th>先後</th>
+                  <th>サイド</th>
+                  <th>大会 / 場所 / 分析</th>
+                  <th class="action-cell">操作</th>
+                </tr>
+              </thead>
+              <tbody id="matchTableBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state hidden" id="emptyState">
+            <strong>戦績なし</strong>
+            <span>条件に合う対戦がありません。</span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="auth-dialog" id="authDialog" aria-labelledby="authDialogTitle">
+      <div class="auth-dialog-header">
+        <div>
+          <p class="panel-kicker">Cloud account</p>
+          <h2 id="authDialogTitle">アカウント</h2>
+        </div>
+        <button class="icon-button" id="authCloseButton" type="button" title="閉じる" aria-label="閉じる">
+          <span data-icon="x"></span>
+        </button>
+      </div>
+
+      <section class="auth-view" id="cloudSetupView">
+        <strong>クラウド接続の設定が必要です</strong>
+        <p>接続が完了するまでは、これまでどおりこの端末に戦績を保存します。</p>
+      </section>
+
+      <section class="auth-view hidden" id="authGuestView">
+        <p class="auth-lead">メールアドレスで登録すると、スマホとPCで戦績を同期できます。</p>
+        <form class="auth-form" id="authForm">
+          <label class="field">
+            <span>メールアドレス</span>
+            <input id="authEmailInput" type="email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span>パスワード</span>
+            <input id="authPasswordInput" type="password" minlength="8" autocomplete="current-password" required />
+          </label>
+          <div class="auth-actions">
+            <button class="button primary" id="signInButton" type="submit">
+              <span class="button-icon" data-icon="login"></span>
+              <span>ログイン</span>
+            </button>
+            <button class="button secondary" id="signUpButton" type="button">
+              <span class="button-icon" data-icon="user-plus"></span>
+              <span>新規登録</span>
+            </button>
+          </div>
+          <button class="text-button" id="passwordResetButton" type="button">パスワードを再設定</button>
+        </form>
+      </section>
+
+      <section class="auth-view hidden" id="authUserView">
+        <div class="account-summary">
+          <span class="account-avatar" data-icon="user"></span>
+          <div>
+            <span>ログイン中</span>
+            <strong id="accountEmail">-</strong>
+          </div>
+        </div>
+        <div class="auth-actions">
+          <button class="button primary" id="syncNowButton" type="button">
+            <span class="button-icon" data-icon="refresh"></span>
+            <span>今すぐ同期</span>
+          </button>
+          <button class="button secondary" id="signOutButton" type="button">
+            <span class="button-icon" data-icon="logout"></span>
+            <span>ログアウト</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="auth-view hidden" id="passwordRecoveryView">
+        <p class="auth-lead">新しいパスワードを8文字以上で入力してください。</p>
+        <form class="auth-form" id="passwordRecoveryForm">
+          <label class="field">
+            <span>新しいパスワード</span>
+            <input id="newPasswordInput" type="password" minlength="8" autocomplete="new-password" required />
+          </label>
+          <label class="field">
+            <span>新しいパスワード（確認）</span>
+            <input id="newPasswordConfirmInput" type="password" minlength="8" autocomplete="new-password" required />
+          </label>
+          <button class="button primary" id="updatePasswordButton" type="submit">
+            <span class="button-icon" data-icon="check"></span>
+            <span>パスワードを更新</span>
+          </button>
+        </form>
+      </section>
+
+      <p class="auth-message" id="authMessage" aria-live="polite"></p>
+    </dialog>
+
+    <dialog class="auth-dialog help-dialog" id="helpDialog" aria-labelledby="helpDialogTitle">
+      <div class="auth-dialog-header">
+        <div>
+          <p class="panel-kicker">How to use</p>
+          <h2 id="helpDialogTitle">使い方</h2>
+        </div>
+        <button class="icon-button" id="helpCloseButton" type="button" title="閉じる" aria-label="閉じる">
+          <span data-icon="x"></span>
+        </button>
+      </div>
+      <ol class="usage-list">
+        <li><strong>アカウント登録</strong><span>「ログイン」から新規登録し、確認メールを開きます。</span></li>
+        <li><strong>対戦を記録</strong><span>大会・デッキ・勝敗などを入力して「登録」を押します。</span></li>
+        <li><strong>成績を分析</strong><span>デッキ別、対面別、先後別の勝率や負け理由を確認します。</span></li>
+        <li><strong>端末間で同期</strong><span>同じアカウントでログインすると、スマホとPCで戦績を共有できます。</span></li>
+      </ol>
+      <p class="help-note">不具合や欲しい機能は、Discordの「📈〈開発〉戦績記録アプリ」へ投稿してください。</p>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js?v=public-guide-01"></script>
+    <script src="./cloud.js?v=public-guide-01"></script>
+    <script src="./pokemon-data.js?v=public-guide-01"></script>
+    <script src="./app.js?v=public-guide-01"></script>
+  </body>
+</html>
