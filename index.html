@@ -130,46 +130,6 @@
                 </label>
               </div>
 
-              <div class="field-row two">
-                <fieldset class="pokemon-picker">
-                  <legend>使用デッキのアイコン</legend>
-                  <label class="field pokemon-search-field">
-                    <span>ポケモンを検索</span>
-                    <input id="playerPokemonSearch" type="search" placeholder="日本語名・英語名・図鑑番号" autocomplete="off" />
-                  </label>
-                  <div class="pokemon-picker-grid">
-                    <label class="field">
-                      <span>1体目</span>
-                      <select id="playerIcon1Select" class="pokemon-select"></select>
-                    </label>
-                    <label class="field">
-                      <span>2体目</span>
-                      <select id="playerIcon2Select" class="pokemon-select"></select>
-                    </label>
-                  </div>
-                  <div class="pokemon-preview-row" id="playerIconPreview" aria-label="使用デッキのアイコンプレビュー"></div>
-                </fieldset>
-
-                <fieldset class="pokemon-picker">
-                  <legend>相手デッキのアイコン</legend>
-                  <label class="field pokemon-search-field">
-                    <span>ポケモンを検索</span>
-                    <input id="opponentPokemonSearch" type="search" placeholder="日本語名・英語名・図鑑番号" autocomplete="off" />
-                  </label>
-                  <div class="pokemon-picker-grid">
-                    <label class="field">
-                      <span>1体目</span>
-                      <select id="opponentIcon1Select" class="pokemon-select"></select>
-                    </label>
-                    <label class="field">
-                      <span>2体目</span>
-                      <select id="opponentIcon2Select" class="pokemon-select"></select>
-                    </label>
-                  </div>
-                  <div class="pokemon-preview-row" id="opponentIconPreview" aria-label="相手デッキのアイコンプレビュー"></div>
-                </fieldset>
-              </div>
-
               <div class="field-row two compact">
                 <fieldset class="segmented-field">
                   <legend>結果</legend>
@@ -723,8 +683,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./supabase-config.js?v=invite-code-01"></script>
     <script src="./cloud.js?v=invite-code-01"></script>
-    <script src="./pokemon-data.js?v=original-icons-01"></script>
-    <script src="./pokemon-types.js?v=original-icons-01"></script>
-    <script src="./app.js?v=original-icons-01"></script>
+    <script src="./pokemon-data.js?v=no-icons-01"></script>
+    <script src="./app.js?v=no-icons-01"></script>
   </body>
 </html>

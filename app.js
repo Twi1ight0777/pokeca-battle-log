@@ -101,11 +101,7 @@ const csvColumns = [
   ["date", "日付"],
   ["playerDeck", "自分のデッキ"],
   ["deckVersion", "デッキ版"],
-  ["playerIcon1", "自分アイコン1"],
-  ["playerIcon2", "自分アイコン2"],
   ["opponentDeck", "相手のデッキ"],
-  ["opponentIcon1", "相手アイコン1"],
-  ["opponentIcon2", "相手アイコン2"],
   ["result", "結果"],
   ["turn", "先後"],
   ["event", "大会"],
@@ -281,8 +277,6 @@ init();
 
 function init() {
   injectIcons(document);
-  populatePokemonIconSelects();
-  updateIconPreviews();
   elements.dateInput.value = todayIso();
   bindEvents();
   render();
@@ -316,15 +310,6 @@ function bindEvents() {
     if (event.target === elements.helpDialog) elements.helpDialog.close();
   });
   elements.resetFiltersButton.addEventListener("click", resetFilters);
-  elements.playerDeckInput.addEventListener("change", () => fillKnownDeckIcons("player"));
-  elements.playerDeckInput.addEventListener("blur", () => fillKnownDeckIcons("player"));
-  elements.opponentDeckInput.addEventListener("change", () => fillKnownDeckIcons("opponent"));
-  elements.opponentDeckInput.addEventListener("blur", () => fillKnownDeckIcons("opponent"));
-  getPokemonSelects().forEach((select) => {
-    select.addEventListener("change", updateIconPreviews);
-  });
-  elements.playerPokemonSearch.addEventListener("input", () => filterPokemonIconSelects("player"));
-  elements.opponentPokemonSearch.addEventListener("input", () => filterPokemonIconSelects("opponent"));
   elements.queryInput.addEventListener("input", () => {
     state.filters.query = elements.queryInput.value.trim();
     render();
@@ -388,8 +373,8 @@ function readForm() {
     playerDeck: elements.playerDeckInput.value,
     deckVersion: elements.deckVersionInput.value,
     opponentDeck: elements.opponentDeckInput.value,
-    playerIcons: getSelectedPokemonIcons("player"),
-    opponentIcons: getSelectedPokemonIcons("opponent"),
+    playerIcons: [],
+    opponentIcons: [],
     result: document.querySelector('input[name="result"]:checked')?.value,
     turn: document.querySelector('input[name="turn"]:checked')?.value,
     scoreFor: elements.scoreForInput.value,
@@ -437,9 +422,6 @@ function resetForm() {
   elements.form.reset();
   elements.matchId.value = "";
   elements.dateInput.value = todayIso();
-  clearPokemonSearches();
-  setPokemonIconSelectors("player", []);
-  setPokemonIconSelectors("opponent", []);
   setRadioValue("result", "win");
   setRadioValue("turn", "first");
   elements.cancelEditButton.classList.add("hidden");
@@ -459,9 +441,6 @@ function editMatch(id) {
   elements.playerDeckInput.value = match.playerDeck;
   elements.deckVersionInput.value = match.deckVersion;
   elements.opponentDeckInput.value = match.opponentDeck;
-  clearPokemonSearches();
-  setPokemonIconSelectors("player", match.playerIcons);
-  setPokemonIconSelectors("opponent", match.opponentIcons);
   elements.scoreForInput.value = match.scoreFor;
   elements.scoreAgainstInput.value = match.scoreAgainst;
   setCheckedValues("lossReason", match.lossReasons);
@@ -645,9 +624,10 @@ function getPokemonSelects() {
 }
 
 function getIconControls(role) {
-  return role === "player"
+  return (role === "player"
     ? [elements.playerIcon1Select, elements.playerIcon2Select]
-    : [elements.opponentIcon1Select, elements.opponentIcon2Select];
+    : [elements.opponentIcon1Select, elements.opponentIcon2Select]
+  ).filter(Boolean);
 }
 
 function getSelectedPokemonIcons(role) {
@@ -713,27 +693,7 @@ function renderDeckName(name, icons, wrapperClass, nameClass) {
 }
 
 function renderPokemonIcons(icons) {
-  const normalized = normalizePokemonIcons(icons);
-  if (!normalized.length) return "";
-  return `
-    <span class="pokemon-icons">
-      ${normalized
-        .map((iconId) => {
-          const type = pokemonIconType(iconId);
-          const name = pokemonIconDisplayName(iconId);
-          const nameLength = Array.from(name).length;
-          const sizeClass = nameLength > 7 ? " is-extra-long" : nameLength > 4 ? " is-long" : "";
-          const number = padDexNumber(pokemonIconNumber(iconId));
-          return `
-            <span class="pokemon-icon pokemon-type-${type.slug}" title="${escapeAttr(`${pokemonIconLabel(iconId)} ・ ${type.label}`)}">
-              <span class="pokemon-icon-name${sizeClass}">${escapeHtml(name)}</span>
-              <span class="pokemon-icon-number">No.${number}</span>
-            </span>
-          `;
-        })
-        .join("")}
-    </span>
-  `;
+  return "";
 }
 
 function pokemonIconType(iconId) {
