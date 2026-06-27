@@ -512,7 +512,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 30px;
+  min-height: 46px;
 }
 
 .pokemon-preview-row {
@@ -521,20 +521,84 @@ h2 {
 
 .pokemon-icon {
   display: inline-grid;
+  grid-template-rows: 1fr auto;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 46px;
+  height: 46px;
   overflow: hidden;
-  border: 1px solid rgba(115, 81, 164, 0.18);
+  padding: 7px 3px 5px;
+  border: 2px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
-  background: rgba(255, 253, 248, 0.9);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(44, 36, 52, 0.18);
+  text-align: center;
 }
 
-.pokemon-icon img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  image-rendering: auto;
+.pokemon-icon-name {
+  align-self: end;
+  max-width: 100%;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pokemon-icon-name.is-long {
+  font-size: 7px;
+}
+
+.pokemon-icon-name.is-extra-long {
+  font-size: 6px;
+}
+
+.pokemon-icon-number {
+  align-self: start;
+  margin-top: 3px;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.88;
+}
+
+.pokemon-type-normal { background: #6f746d; }
+.pokemon-type-fighting { background: #b24a3c; }
+.pokemon-type-flying { background: #687fc0; }
+.pokemon-type-poison { background: #8b579f; }
+.pokemon-type-ground { background: #9a6c38; }
+.pokemon-type-rock { background: #827038; }
+.pokemon-type-bug { background: #6d822d; }
+.pokemon-type-ghost { background: #655993; }
+.pokemon-type-steel { background: #607784; }
+.pokemon-type-fire { background: #d65336; }
+.pokemon-type-water { background: #3676b3; }
+.pokemon-type-grass { background: #3c8655; }
+.pokemon-type-electric { background: #d8ac21; color: #352900; }
+.pokemon-type-psychic { background: #b94b73; }
+.pokemon-type-ice { background: #398a9e; }
+.pokemon-type-dragon { background: #6352ad; }
+.pokemon-type-dark { background: #514946; }
+.pokemon-type-fairy { background: #b95f88; }
+
+.deck-cell .pokemon-icon,
+.stat-name-wrap .pokemon-icon {
+  width: 38px;
+  height: 38px;
+  padding: 6px 2px 4px;
+}
+
+.deck-cell .pokemon-icon-name,
+.stat-name-wrap .pokemon-icon-name {
+  font-size: 7px;
+}
+
+.deck-cell .pokemon-icon-name.is-long,
+.stat-name-wrap .pokemon-icon-name.is-long {
+  font-size: 6px;
+}
+
+.deck-cell .pokemon-icon-name.is-extra-long,
+.stat-name-wrap .pokemon-icon-name.is-extra-long {
+  font-size: 5px;
 }
 
 .form-actions {

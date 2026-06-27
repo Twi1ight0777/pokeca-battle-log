@@ -1,15 +1,33 @@
 const STORAGE_KEY = "pokemon-card-match-log-v1";
-const SEREBII_XY_ICON_BASE = "https://www.serebii.net/pokedex-xy/icon/";
-const SEREBII_SV_ICON_BASE = "https://www.serebii.net/pokedex-sv/icon/";
 const POKEMON_ICON_MAX = 1025;
 const POKEMON_NAMES = window.POKEMON_NAMES || [];
 const POKEMON_JAPANESE_NAMES = window.POKEMON_JAPANESE_NAMES || [];
-const MEGA_ICON_ENTRIES = (window.MEGA_ICON_ENTRIES || []).map(([id, labelJa, labelEn, fallback, image]) => ({
+const POKEMON_PRIMARY_TYPES = window.POKEMON_PRIMARY_TYPES || [];
+const POKEMON_TYPE_META = {
+  1: { slug: "normal", label: "ノーマル" },
+  2: { slug: "fighting", label: "かくとう" },
+  3: { slug: "flying", label: "ひこう" },
+  4: { slug: "poison", label: "どく" },
+  5: { slug: "ground", label: "じめん" },
+  6: { slug: "rock", label: "いわ" },
+  7: { slug: "bug", label: "むし" },
+  8: { slug: "ghost", label: "ゴースト" },
+  9: { slug: "steel", label: "はがね" },
+  10: { slug: "fire", label: "ほのお" },
+  11: { slug: "water", label: "みず" },
+  12: { slug: "grass", label: "くさ" },
+  13: { slug: "electric", label: "でんき" },
+  14: { slug: "psychic", label: "エスパー" },
+  15: { slug: "ice", label: "こおり" },
+  16: { slug: "dragon", label: "ドラゴン" },
+  17: { slug: "dark", label: "あく" },
+  18: { slug: "fairy", label: "フェアリー" },
+};
+const MEGA_ICON_ENTRIES = (window.MEGA_ICON_ENTRIES || []).map(([id, labelJa, labelEn, fallback]) => ({
   id,
   labelJa,
   labelEn,
   fallback,
-  image,
 }));
 const MEGA_ICON_BY_ID = new Map(MEGA_ICON_ENTRIES.map((entry) => [entry.id, entry]));
 let pokemonIconOptions = [];
@@ -700,31 +718,34 @@ function renderPokemonIcons(icons) {
   return `
     <span class="pokemon-icons">
       ${normalized
-        .map(
-          (iconId) => `
-            <span class="pokemon-icon" title="${escapeAttr(pokemonIconLabel(iconId))}">
-              <img src="${pokemonIconUrl(iconId)}" alt="${escapeAttr(pokemonIconLabel(iconId))}" loading="lazy"${pokemonIconFallbackAttr(iconId)} />
+        .map((iconId) => {
+          const type = pokemonIconType(iconId);
+          const name = pokemonIconDisplayName(iconId);
+          const nameLength = Array.from(name).length;
+          const sizeClass = nameLength > 7 ? " is-extra-long" : nameLength > 4 ? " is-long" : "";
+          const number = padDexNumber(pokemonIconNumber(iconId));
+          return `
+            <span class="pokemon-icon pokemon-type-${type.slug}" title="${escapeAttr(`${pokemonIconLabel(iconId)} ・ ${type.label}`)}">
+              <span class="pokemon-icon-name${sizeClass}">${escapeHtml(name)}</span>
+              <span class="pokemon-icon-number">No.${number}</span>
             </span>
-          `,
-        )
+          `;
+        })
         .join("")}
     </span>
   `;
 }
 
-function pokemonIconUrl(iconId) {
-  const mega = MEGA_ICON_BY_ID.get(iconId);
-  if (mega?.image) return mega.image;
-  if (mega) return `${SEREBII_XY_ICON_BASE}${mega.id}.png`;
+function pokemonIconType(iconId) {
   const number = pokemonIconNumber(iconId);
-  const base = number <= 721 ? SEREBII_XY_ICON_BASE : SEREBII_SV_ICON_BASE;
-  return `${base}${iconId}.png`;
+  return POKEMON_TYPE_META[POKEMON_PRIMARY_TYPES[number - 1]] || POKEMON_TYPE_META[1];
 }
 
-function pokemonIconFallbackAttr(iconId) {
+function pokemonIconDisplayName(iconId) {
   const mega = MEGA_ICON_BY_ID.get(iconId);
-  if (!mega?.fallback) return "";
-  return ` onerror="this.onerror=null;this.src='${pokemonIconUrl(mega.fallback)}'"`;
+  if (mega) return mega.labelJa;
+  const number = pokemonIconNumber(iconId);
+  return POKEMON_JAPANESE_NAMES[number - 1] || `No.${padDexNumber(number)}`;
 }
 
 function pokemonIconNumber(iconId) {
